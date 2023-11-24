@@ -4,7 +4,6 @@ import { sql } from '@vercel/postgres';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { signIn } from '@/auth';
-import moment from "moment";
 
 const FormSchema = z.object({
   id: z.string(),
@@ -51,14 +50,13 @@ export async function createInvoice(prevState: State, formData: FormData) {
   // Prepare data for insertion into the database
   const { customerId, amount, status } = validatedFields.data;
   const amountInCents = amount * 100;
-  const currentDate = moment();
-  const formattedDate = currentDate.format('YYYYMMDDHHmm');
+  const date = new Date().toISOString().split('T')[0];
  
   // Insert data into the database
   try {
     await sql`
       INSERT INTO invoices (customer_id, amount, status, date)
-      VALUES (${customerId}, ${amountInCents}, ${status}, ${formattedDate})
+      VALUES (${customerId}, ${amountInCents}, ${status}, ${date})
     `;
   } catch (error) {
     // If a database error occurs, return a more specific error.
